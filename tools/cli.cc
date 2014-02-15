@@ -20,70 +20,60 @@
  * THE SOFTWARE.
  */
 
-#include "repl.h"
-
 #include <iostream>
 #include <stdexcept>
-#include <sstream>
-#include <string>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <vector>
+#include <iomanip>
+
+#include "repl.h"
+#include "run.h"
+#include "retarget.h"
 
 using namespace std;
 
-struct quit : exception {};
-struct help : exception {};
+struct usage_error : exception {};
 
-repl_cmd::repl_cmd() {
-	name = "repl";
-	description = "Assembly REPL.";
-}
+vector<command*> commands {
+	new repl_cmd(),
+	new run_cmd(),
+	new retarget_cmd(),
+};
 
-void repl_cmd::run(int args_num, char const *args[]) {
-	while (true) {
-		string cmd = readline("> ");
+void handle_args(int args_num, char const *args[]) {
+	if (args_num == 0) {
+		throw usage_error(); 
+	}
 
-		try {
-			handle_cmd(cmd);
-		}
-		catch (help) {
-			cout << "Help:" << endl;
-		}
-		catch (quit) {
+	command *cmd = nullptr;
+	for (command *c : commands) {
+		if (c->name == args[0]) {
+			cmd = c;
 			break;
 		}
-		catch (runtime_error& e) {
-			cout << e.what() << endl;
-		}
-
-		add_history(cmd.c_str());
 	}
 
-	cout << "Done." << endl;
+	if (!cmd) {
+		throw usage_error();
+	}
+
+	cmd->run(args_num - 1, args + 1);
 }
 
-void repl_cmd::handle_cmd(std::string cmd) {
-	istringstream tokens(cmd);
-	string token;
-
-	tokens >> token;
-	
-	if (token == "help" || token == "?") {
-		throw help();
+int main(int argc, char const *argv[]) {
+	try {
+		handle_args(argc - 1, argv + 1);
 	}
-	else if (token == "quit" || token == "exit") {
-		throw quit();
-	}
-	else if (token == "arch") {
-		tokens >> token;
-
-		if (!tokens) {
-			throw runtime_error("Usage: arch <arch_name>");
+	catch (usage_error& e) {
+		cerr << "Usage: " << argv[0] << " <command> [options...]" << endl;
+		for (command *c : commands) {
+			cerr << "   " << left << setw(10) << c->name;
+			cerr << c->description << endl;
 		}
+	}
+	catch (runtime_error& e) {
+		cerr << e.what() << endl;
+		return EXIT_FAILURE;
+	}
 
-		cout << "Setting arch to " << token << "." << endl;
-	}
-	else {
-		throw runtime_error("Unknown command.");
-	}
+	return EXIT_SUCCESS;
 }

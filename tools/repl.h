@@ -20,70 +20,17 @@
  * THE SOFTWARE.
  */
 
-#include "repl.h"
+#ifndef REPL_H__
+#define REPL_H__
 
-#include <iostream>
-#include <stdexcept>
-#include <sstream>
-#include <string>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include "command.h"
 
-using namespace std;
+struct repl_cmd : public command {
+	repl_cmd();
+	void run(int args_num, char const *args[]);
 
-struct quit : exception {};
-struct help : exception {};
+private:
+	void handle_cmd(std::string);
+};
 
-repl_cmd::repl_cmd() {
-	name = "repl";
-	description = "Assembly REPL.";
-}
-
-void repl_cmd::run(int args_num, char const *args[]) {
-	while (true) {
-		string cmd = readline("> ");
-
-		try {
-			handle_cmd(cmd);
-		}
-		catch (help) {
-			cout << "Help:" << endl;
-		}
-		catch (quit) {
-			break;
-		}
-		catch (runtime_error& e) {
-			cout << e.what() << endl;
-		}
-
-		add_history(cmd.c_str());
-	}
-
-	cout << "Done." << endl;
-}
-
-void repl_cmd::handle_cmd(std::string cmd) {
-	istringstream tokens(cmd);
-	string token;
-
-	tokens >> token;
-	
-	if (token == "help" || token == "?") {
-		throw help();
-	}
-	else if (token == "quit" || token == "exit") {
-		throw quit();
-	}
-	else if (token == "arch") {
-		tokens >> token;
-
-		if (!tokens) {
-			throw runtime_error("Usage: arch <arch_name>");
-		}
-
-		cout << "Setting arch to " << token << "." << endl;
-	}
-	else {
-		throw runtime_error("Unknown command.");
-	}
-}
+#endif	
