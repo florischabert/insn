@@ -20,29 +20,9 @@
  * THE SOFTWARE.
  */
 
-#include <iostream>
-#include <stdexcept>
-#include <vector>
-#include <iomanip>
+#ifndef PRINTER_H__
+#define PRINTER_H__
 
-#include "repl.h"
-#include "run.h"
 
-using namespace std;
 
-int main(int argc, char const *argv[]) {
-	try {
-		if (argc == 1) {
-			repl().loop();
-		}
-		else {
-			run(string(argv[1]));
-		}
-	}
-	catch (runtime_error& e) {
-		cerr << e.what() << endl;
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
-}
+#endif

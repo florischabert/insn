@@ -23,14 +23,19 @@
 #ifndef REPL_H__
 #define REPL_H__
 
-#include "command.h"
+#include <string>
+#include <map>
 
-struct repl_cmd : public command {
-	repl_cmd();
-	void run(int args_num, char const *args[]);
+struct repl {
+	repl();
+	void loop();
 
 private:
-	void handle_cmd(std::string);
+	std::map<std::string, void (repl::*)(std::istringstream&)> cmds;
+	void help_cmd(std::istringstream&);
+	void quit_cmd(std::istringstream&);
+	void arch_cmd(std::istringstream&);
+	void asm_cmd(std::istringstream&);
 };
 
 #endif	

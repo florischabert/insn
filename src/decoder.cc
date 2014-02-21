@@ -20,29 +20,12 @@
  * THE SOFTWARE.
  */
 
-#include <iostream>
-#include <stdexcept>
-#include <vector>
-#include <iomanip>
+#include "decoder.h"
 
-#include "repl.h"
-#include "run.h"
+namespace insn {
 
-using namespace std;
+decoder::decoder(uintptr_t code) {
+	code_current = code_start = code;
+}
 
-int main(int argc, char const *argv[]) {
-	try {
-		if (argc == 1) {
-			repl().loop();
-		}
-		else {
-			run(string(argv[1]));
-		}
-	}
-	catch (runtime_error& e) {
-		cerr << e.what() << endl;
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
 }

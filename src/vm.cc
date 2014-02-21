@@ -20,13 +20,4 @@
  * THE SOFTWARE.
  */
 
-#include "retarget.h"
-
-retarget_cmd::retarget_cmd() {
-	name = "retarget";
-	description = "Static retargeting of a binary.";
-}
-
-void retarget_cmd::run(int args_num, char const *args[]) {
-
-}
+#include "vm.h"

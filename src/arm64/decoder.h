@@ -20,14 +20,15 @@
  * THE SOFTWARE.
  */
 
-#ifndef RETARGET_H__
-#define RETARGET_H__
+#include "../decoder.h"
 
-#include "command.h"
+namespace insn {
+namespace arm64 {
 
-struct retarget_cmd : public command {
-	retarget_cmd();
-	void run(int args_num, char const *args[]);
+class decoder : public insn::decoder {
+public:
+	void next();
 };
- 
-#endif
+
+}
+}

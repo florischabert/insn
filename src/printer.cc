@@ -20,15 +20,6 @@
  * THE SOFTWARE.
  */
 
-#ifndef COMMAND_H__
-#define COMMAND_H__
+#include "printer.h"
+ 
 
-#include <string>
-
-struct command {
-	std::string name;
-	std::string description;
-	virtual void run(int args_num, char const *args[]) = 0;
-};
-
-#endif	

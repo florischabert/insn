@@ -20,29 +20,17 @@
  * THE SOFTWARE.
  */
 
-#include <iostream>
+#ifndef VM_H__
+#define VM_H__
+
 #include <stdexcept>
-#include <vector>
-#include <iomanip>
 
-#include "repl.h"
-#include "run.h"
+class vm {
+public:
+	vm() {};
+	~vm() {};
 
-using namespace std;
+	virtual void next() = 0;
+};
 
-int main(int argc, char const *argv[]) {
-	try {
-		if (argc == 1) {
-			repl().loop();
-		}
-		else {
-			run(string(argv[1]));
-		}
-	}
-	catch (runtime_error& e) {
-		cerr << e.what() << endl;
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
-}
+#endif

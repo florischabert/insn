@@ -20,29 +20,27 @@
  * THE SOFTWARE.
  */
 
-#include <iostream>
+#ifndef DECODER_H__
+#define DECODER_H__
+
 #include <stdexcept>
-#include <vector>
-#include <iomanip>
+#include <cstdint>
 
-#include "repl.h"
-#include "run.h"
+namespace insn {
 
-using namespace std;
+struct invalid : public std::exception {};
+struct unsupported : public std::exception {};
 
-int main(int argc, char const *argv[]) {
-	try {
-		if (argc == 1) {
-			repl().loop();
-		}
-		else {
-			run(string(argv[1]));
-		}
-	}
-	catch (runtime_error& e) {
-		cerr << e.what() << endl;
-		return EXIT_FAILURE;
-	}
+class decoder {
+public:
+	decoder(uintptr_t code);
+	virtual void next() = 0;
 
-	return EXIT_SUCCESS;
+protected:
+	uintptr_t code_start;
+	uintptr_t code_current;
+};
+
 }
+
+#endif

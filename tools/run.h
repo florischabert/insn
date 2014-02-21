@@ -23,11 +23,10 @@
 #ifndef RUN_H__
 #define RUN_H__
 
-#include "command.h"
+#include <string>
 
-struct run_cmd : public command {
-	run_cmd();
-	void run(int args_num, char const *args[]);
+struct run {
+	run(std::string filename);
 };
  
 #endif	

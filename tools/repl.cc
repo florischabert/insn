@@ -26,28 +26,47 @@
 #include <stdexcept>
 #include <sstream>
 #include <string>
+#include <functional> 
+#include <map>
+
 #include <readline/readline.h>
 #include <readline/history.h>
 
 using namespace std;
 
 struct quit : exception {};
-struct help : exception {};
 
-repl_cmd::repl_cmd() {
-	name = "repl";
-	description = "Assembly REPL.";
+repl::repl() {
+	cmds["help"] = &repl::help_cmd;
+	cmds["quit"] = &repl::quit_cmd;
+	cmds["arch"] = &repl::arch_cmd;
+	cmds["asm"] = &repl::asm_cmd;
 }
 
-void repl_cmd::run(int args_num, char const *args[]) {
+void repl::loop() {
+	rl_bind_key('\t', rl_insert);
+
 	while (true) {
-		string cmd = readline("> ");
+		char *cmd_str = readline("> ");
+		if (!cmd_str) {
+			cout << endl;
+			break;
+		}
 
 		try {
-			handle_cmd(cmd);
-		}
-		catch (help) {
-			cout << "Help:" << endl;
+			istringstream tokens(cmd_str);
+			string token;
+
+			tokens >> token;
+			void (repl::*handler)(std::istringstream&) = cmds[token];
+			if (handler) {
+				(this->*handler)(tokens);
+			}
+			else {
+				throw runtime_error("Unknown command.");
+			}
+
+			add_history(cmd_str);
 		}
 		catch (quit) {
 			break;
@@ -55,35 +74,29 @@ void repl_cmd::run(int args_num, char const *args[]) {
 		catch (runtime_error& e) {
 			cout << e.what() << endl;
 		}
-
-		add_history(cmd.c_str());
 	}
 
 	cout << "Done." << endl;
 }
 
-void repl_cmd::handle_cmd(std::string cmd) {
-	istringstream tokens(cmd);
-	string token;
+void repl::help_cmd(std::istringstream& cmd) {
+	cout << "Help:" << endl;
+}
 
-	tokens >> token;
-	
-	if (token == "help" || token == "?") {
-		throw help();
-	}
-	else if (token == "quit" || token == "exit") {
-		throw quit();
-	}
-	else if (token == "arch") {
-		tokens >> token;
+void repl::quit_cmd(std::istringstream& cmd) {
+	throw quit();
+}
 
-		if (!tokens) {
-			throw runtime_error("Usage: arch <arch_name>");
-		}
+void repl::arch_cmd(std::istringstream& cmd) {
+	if (!cmd) {
+		throw runtime_error("Usage: arch <arch_name>");
+	}
 
-		cout << "Setting arch to " << token << "." << endl;
-	}
-	else {
-		throw runtime_error("Unknown command.");
-	}
+	string arch_name;
+	cmd >> arch_name;
+	cout << "Setting arch to " << arch_name << "." << endl;
+}
+
+void repl::asm_cmd(std::istringstream& cmd) {
+
 }

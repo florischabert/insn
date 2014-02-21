@@ -22,12 +22,7 @@
 
 #include "run.h"
 
-run_cmd::run_cmd() {
-	name = "run";
-	description = "Dynamically translate a binary.";
-}
-
-void run_cmd::run(int args_num, char const *args[]) {
+run::run(std::string filename) {
 
 }
 
