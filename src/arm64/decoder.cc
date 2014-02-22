@@ -25,6 +25,22 @@
 namespace insn {
 namespace arm64 {
 
+void _adr(int rd, int imm) {}
+void _adrp(int rd, int imm) {}
+void _add(int rd, int rn, int imm, int shift, bool is_64, bool set_flags) {}
+void _sub(int rd, int rn, int imm, int shift, bool is_64, bool set_flags) {}
+void _and(int rd, int rn, int imms, int immr, bool is_64) {}
+void _orr(int rd, int rn, int imms, int immr, bool is_64) {}
+void _eor(int rd, int rn, int imms, int immr, bool is_64) {}
+void _ands(int rd, int rn, int imms, int immr, bool is_64) {}
+void _movn(int rd, int imm, int is_64) {}
+void _movz(int rd, int imm, int is_64) {}
+void _movk(int rd, int imm, int is_64) {}
+void _sbfm(int rd, int rn, int imms, int immr, bool is_64) {}
+void _bfm(int rd, int rn, int imms, int immr, bool is_64) {}
+void _ubfm(int rd, int rn, int imms, int immr, bool is_64) {}
+void _ext(int rd, int rn, int rm, int immr, bool is_64) {}
+
 namespace opcode {
 
 #pragma mark opcode - top
@@ -220,27 +236,144 @@ bool is_data_proc_1(uint32_t opcode) {
 
 #pragma mark opcode - data processing (simd, vfp) instructions
 
+
+#pragma mark opcode helpers
+
+bool bit(uint32_t opcode, int index) {
+	return (opcode & (1 << index)) != 0;
+}
+
+int val(uint32_t opcode, int index_end, int index_start) {
+	int v = opcode >> index_start;
+	if (index_end - index_start < 31) {
+		v &= ((1 << (index_end-index_start+1)) - 1);
+	}
+	return v;
+}
+
 }
 
 #pragma mark decode - data processing (immediate)
 
 void decode_rel_addressing(uint32_t opcode) {
-	throw unsupported();
+	int op = opcode::val(opcode, 31, 31);
+	int rd = opcode::val(opcode, 4, 0);
+	int immh = opcode::val(opcode, 23, 5);
+	int imml = opcode::val(opcode, 30, 29);
+	int imm = (immh << 2) | imml;
+
+	switch (op) {
+		case 0b0:
+			_adr(rd, imm);
+			break;
+		case 0b1:
+			_adrp(rd, imm);
+			break;
+	}
 }
+
 void decode_add_sub_imm(uint32_t opcode) {
-	throw unsupported();
+	bool is_64 = opcode::bit(opcode, 31);
+	int op = opcode::val(opcode, 30, 30);
+	bool set_flags = opcode::bit(opcode, 29);
+	int rd = opcode::val(opcode, 4, 0);
+	int rn = opcode::val(opcode, 9, 5);
+	int imm = opcode::val(opcode, 21, 10);
+	int shift = opcode::val(opcode, 23, 22);
+
+	switch (op) {
+		case 0b0:
+			_add(rd, rn, imm, shift, is_64, set_flags);
+			break;
+		case 0b1:
+			_sub(rd, rn, imm, shift, is_64, set_flags);
+			break;
+	}
 }
+
 void decode_logical_imm(uint32_t opcode) {
-	throw unsupported();
+	bool is_64 = opcode::bit(opcode, 31);
+	int op = opcode::val(opcode, 30, 29);
+	int rd = opcode::val(opcode, 4, 0);
+	int rn = opcode::val(opcode, 9, 5);
+	int imms = opcode::val(opcode, 15, 10);
+	int immr = opcode::val(opcode, 21, 16);
+
+	switch (op) {
+		case 0b00:
+			_and(rd, rn, imms, immr, is_64);
+			break;
+		case 0b01:
+			_orr(rd, rn, imms, immr, is_64);
+			break;
+		case 0b10:
+			_eor(rd, rn, imms, immr, is_64);
+			break;
+		case 0b11:
+			_ands(rd, rn, imms, immr, is_64);
+			break;
+	}
 }
+
 void decode_move_wide(uint32_t opcode) {
-	throw unsupported();
+	bool is_64 = opcode::bit(opcode, 31);
+	int op = opcode::val(opcode, 30, 29);
+	int rd = opcode::val(opcode, 4, 0);
+	int imm = opcode::val(opcode, 21, 5);
+
+	switch (op) {
+		case 0b00:
+			_movn(rd, imm, is_64);
+			break;
+		case 0b10:
+			_movz(rd, imm, is_64);
+			break;
+		case 0b11:
+			_movk(rd, imm, is_64);
+			break;
+		default:
+			throw invalid();
+	}
 }
+
 void decode_bitfield(uint32_t opcode) {
-	throw unsupported();
+	bool is_64 = opcode::bit(opcode, 31);
+	int op = opcode::val(opcode, 30, 29);
+	int rd = opcode::val(opcode, 4, 0);
+	int rn = opcode::val(opcode, 9, 5);
+	int imms = opcode::val(opcode, 15, 10);
+	int immr = opcode::val(opcode, 21, 16);
+
+	switch (op) {
+		case 0b00:
+			_sbfm(rd, rn, imms, immr, is_64);
+			break;
+		case 0b01:
+			_bfm(rd, rn, imms, immr, is_64);
+			break;
+		case 0b10:
+			_ubfm(rd, rn, imms, immr, is_64);
+			break;
+		case 0b11:
+			throw invalid();
+	}
 }
+
 void decode_extract(uint32_t opcode) {
-	throw unsupported();
+	bool is_64 = opcode::bit(opcode, 31);
+	int op = opcode::val(opcode, 30, 29);
+	int rd = opcode::val(opcode, 4, 0);
+	int rn = opcode::val(opcode, 9, 5);
+	int imms = opcode::val(opcode, 15, 10);
+	int rm = opcode::val(opcode, 20, 16);
+
+	switch (op) {
+		case 0b00:
+			_ext(rd, rn, rm, imms, is_64);
+			break;
+		case 0b11:
+			throw invalid();
+	}
 }
 
 void decode_data_proc_imm(uint32_t opcode) {
