@@ -20,7 +20,13 @@
  * THE SOFTWARE.
  */
 
+#ifndef ARM64_DECODER_H__
+#define ARM64_DECODER_H__
+
 #include "../decoder.h"
+#include "printer.h"
+
+#include <functional>
 
 namespace insn {
 namespace arm64 {
@@ -28,7 +34,15 @@ namespace arm64 {
 class decoder : public insn::decoder {
 public:
 	void next();
+
+private:
+	uint32_t fetch();
+	std::function<void(isa*)> decode(uint32_t opcode);
+
+	printer _printer;
 };
 
 }
 }
+
+#endif

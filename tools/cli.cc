@@ -36,7 +36,7 @@ int main(int argc, char const *argv[]) {
 			repl().loop();
 		}
 		else {
-			run(string(argv[1]));
+			run(string(argv[1])).go();
 		}
 	}
 	catch (runtime_error& e) {

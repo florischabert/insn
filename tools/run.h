@@ -25,8 +25,18 @@
 
 #include <string>
 
-struct run {
+#include "run.h"
+#include "../src/loader.h"
+#include "../src/decoder.h"
+
+class run {
+public:
 	run(std::string filename);
+	void go();
+
+private:
+	std::unique_ptr<insn::loader> _loader;
+	std::unique_ptr<insn::decoder> _decoder;
 };
  
 #endif	

@@ -25,6 +25,7 @@
 
 #include <stdexcept>
 #include <cstdint>
+#include <string>
 
 namespace insn {
 
@@ -33,7 +34,9 @@ struct unsupported : public std::exception {};
 
 class decoder {
 public:
-	decoder(uintptr_t code);
+	static decoder* for_arch(std::string arch);
+	void reset();
+	void reset(uintptr_t code);
 	virtual void next() = 0;
 
 protected:

@@ -20,6 +20,31 @@
  * THE SOFTWARE.
  */
 
-#include "printer.h"
- 
+#ifndef ARM64_ISA_H__
+#define ARM64_ISA_H__
 
+namespace insn {
+namespace arm64 {
+
+struct isa {
+	virtual void _adr(int rd, int imm) = 0;
+	virtual void _adrp(int rd, int imm) = 0;
+	virtual void _add(int rd, int rn, int imm, int shift, bool is_64, bool set_flags) = 0;
+	virtual void _sub(int rd, int rn, int imm, int shift, bool is_64, bool set_flags) = 0;
+	virtual void _and(int rd, int rn, int imms, int immr, bool is_64) = 0;
+	virtual void _orr(int rd, int rn, int imms, int immr, bool is_64) = 0;
+	virtual void _eor(int rd, int rn, int imms, int immr, bool is_64) = 0;
+	virtual void _ands(int rd, int rn, int imms, int immr, bool is_64) = 0;
+	virtual void _movn(int rd, int imm, int is_64) = 0;
+	virtual void _movz(int rd, int imm, int is_64) = 0;
+	virtual void _movk(int rd, int imm, int is_64) = 0;
+	virtual void _sbfm(int rd, int rn, int imms, int immr, bool is_64) = 0;
+	virtual void _bfm(int rd, int rn, int imms, int immr, bool is_64) = 0;
+	virtual void _ubfm(int rd, int rn, int imms, int immr, bool is_64) = 0;
+	virtual void _ext(int rd, int rn, int rm, int immr, bool is_64) = 0;
+};
+
+}
+}
+
+#endif

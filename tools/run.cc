@@ -22,8 +22,21 @@
 
 #include "run.h"
 
-run::run(std::string filename) {
+#include <string>
 
+using namespace insn;
+
+run::run(std::string filename) :
+	_loader(loader::for_file(filename)),
+	_decoder(decoder::for_arch(_loader->arch)) {
 }
 
+void run::go() {
+	_loader->load();
+	_decoder->reset(_loader->code);
+
+	while (true) {
+		_decoder->next();
+	}
+}
 

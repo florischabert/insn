@@ -23,6 +23,21 @@
 #ifndef LOADER_H__
 #define LOADER_H__
 
+#include <string>
 
+namespace insn {
+
+class loader {
+public:
+	static loader* for_file(std::string filename);
+	void load();
+
+	std::string arch;
+	uintptr_t code;
+
+private:
+};
+
+}
 
 #endif

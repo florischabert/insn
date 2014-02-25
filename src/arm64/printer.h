@@ -20,6 +20,33 @@
  * THE SOFTWARE.
  */
 
-#include "interpreter.h"
+#ifndef ARM64_PRINTER_H__
+#define ARM64_PRINTER_H__
 
+#include "isa.h"
 
+namespace insn {
+namespace arm64 {
+
+struct printer : public isa {
+	void _adr(int rd, int imm);
+	void _adrp(int rd, int imm);
+	void _add(int rd, int rn, int imm, int shift, bool is_64, bool set_flags);
+	void _sub(int rd, int rn, int imm, int shift, bool is_64, bool set_flags);
+	void _and(int rd, int rn, int imms, int immr, bool is_64);
+	void _orr(int rd, int rn, int imms, int immr, bool is_64);
+	void _eor(int rd, int rn, int imms, int immr, bool is_64);
+	void _ands(int rd, int rn, int imms, int immr, bool is_64);
+	void _movn(int rd, int imm, int is_64);
+	void _movz(int rd, int imm, int is_64);
+	void _movk(int rd, int imm, int is_64);
+	void _sbfm(int rd, int rn, int imms, int immr, bool is_64);
+	void _bfm(int rd, int rn, int imms, int immr, bool is_64);
+	void _ubfm(int rd, int rn, int imms, int immr, bool is_64);
+	void _ext(int rd, int rn, int rm, int immr, bool is_64);
+};
+
+}
+}
+
+#endif

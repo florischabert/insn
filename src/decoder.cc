@@ -22,9 +22,23 @@
 
 #include "decoder.h"
 
+#include "arm64/decoder.h"
+
 namespace insn {
 
-decoder::decoder(uintptr_t code) {
+decoder* decoder::for_arch(std::string arch) {
+	if (arch == "arm64") {
+		return new arm64::decoder();
+	}
+
+	throw std::runtime_error("Architecture not supported");
+}
+
+void decoder::reset() {
+	code_current = code_start;
+}
+
+void decoder::reset(uintptr_t code) {
 	code_current = code_start = code;
 }
 

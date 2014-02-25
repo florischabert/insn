@@ -21,5 +21,15 @@
  */
 
 #include "loader.h"
- 
 
+namespace insn {
+
+loader* loader::for_file(std::string filename) {
+	return nullptr;
+}
+
+void loader::load() {
+
+}
+
+}
