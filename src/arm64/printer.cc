@@ -25,65 +25,74 @@
 namespace insn {
 namespace arm64 {
 
-void printer::_adr(int rd, int imm) {
+void printer::_adr(reg::gpr rd, int imm) {
 
 }
 
-void printer::_adrp(int rd, int imm) {
+void printer::_adrp(reg::gpr rd, int imm) {
 
 }
 
-void printer::_add(int rd, int rn, int imm, int shift, bool is_64, bool set_flags) {
+void printer::_add(reg::gpr rd, reg::gpr rn, int imm, int shift) {
 
 }
 
-void printer::_sub(int rd, int rn, int imm, int shift, bool is_64, bool set_flags) {
+void printer::_adds(reg::gpr rd, reg::gpr rn, int imm, int shift) {
 
 }
 
-void printer::_and(int rd, int rn, int imms, int immr, bool is_64) {
+void printer::_sub(reg::gpr rd, reg::gpr rn, int imm, int shift) {
 
 }
 
-void printer::_orr(int rd, int rn, int imms, int immr, bool is_64) {
+void printer::_subs(reg::gpr rd, reg::gpr rn, int imm, int shift) {
 
 }
 
-void printer::_eor(int rd, int rn, int imms, int immr, bool is_64) {
+void printer::_and(reg::gpr rd, reg::gpr rn, int imms, int immr) {
 
 }
 
-void printer::_ands(int rd, int rn, int imms, int immr, bool is_64) {
+void printer::_orr(reg::gpr rd, reg::gpr rn, int imms, int immr) {
 
 }
 
-void printer::_movn(int rd, int imm, int is_64) {
+void printer::_eor(reg::gpr rd, reg::gpr rn, int imms, int immr) {
 
 }
 
-void printer::_movz(int rd, int imm, int is_64) {
+void printer::_ands(reg::gpr rd, reg::gpr rn, int imms, int immr) {
 
 }
 
-void printer::_movk(int rd, int imm, int is_64) {
+void printer::_movn(reg::gpr rd, int imm) {
 
 }
 
-void printer::_sbfm(int rd, int rn, int imms, int immr, bool is_64) {
+void printer::_movz(reg::gpr rd, int imm) {
 
 }
 
-void printer::_bfm(int rd, int rn, int imms, int immr, bool is_64) {
+void printer::_movk(reg::gpr rd, int imm) {
 
 }
 
-void printer::_ubfm(int rd, int rn, int imms, int immr, bool is_64) {
+void printer::_sbfm(reg::gpr rd, reg::gpr rn, int imms, int immr) {
 
 }
 
-void printer::_ext(int rd, int rn, int rm, int immr, bool is_64) {
+void printer::_bfm(reg::gpr rd, reg::gpr rn, int imms, int immr) {
 
 }
+
+void printer::_ubfm(reg::gpr rd, reg::gpr rn, int imms, int immr) {
+
+}
+
+void printer::_ext(reg::gpr rd, reg::gpr rn, reg::gpr rm, int immr) {
+
+}
+
 
 }
 }

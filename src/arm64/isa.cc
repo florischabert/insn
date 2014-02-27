@@ -20,35 +20,48 @@
  * THE SOFTWARE.
  */
 
-#ifndef ARM64_PRINTER_H__
-#define ARM64_PRINTER_H__
-
 #include "isa.h"
 
 namespace insn {
 namespace arm64 {
 
-struct printer : public isa {
-	void _adr(reg::gpr rd, int imm);
-	void _adrp(reg::gpr rd, int imm);
-	void _add(reg::gpr rd, reg::gpr rn, int imm, int shift);
-	void _adds(reg::gpr rd, reg::gpr rn, int imm, int shift);
-	void _sub(reg::gpr rd, reg::gpr rn, int imm, int shift);
-	void _subs(reg::gpr rd, reg::gpr rn, int imm, int shift);
-	void _and(reg::gpr rd, reg::gpr rn, int imms, int immr);
-	void _orr(reg::gpr rd, reg::gpr rn, int imms, int immr);
-	void _eor(reg::gpr rd, reg::gpr rn, int imms, int immr);
-	void _ands(reg::gpr rd, reg::gpr rn, int imms, int immr);
-	void _movn(reg::gpr rd, int imm);
-	void _movz(reg::gpr rd, int imm);
-	void _movk(reg::gpr rd, int imm);
-	void _sbfm(reg::gpr rd, reg::gpr rn, int imms, int immr);
-	void _bfm(reg::gpr rd, reg::gpr rn, int imms, int immr);
-	void _ubfm(reg::gpr rd, reg::gpr rn, int imms, int immr);
-	void _ext(reg::gpr rd, reg::gpr rn, reg::gpr rm, int immr);
-};
+namespace reg {
+
+gpr& x(int idx) {
+	static gpr_x x[] = {
+		gpr_x(0),  gpr_x(1),  gpr_x(2),  gpr_x(3),
+		gpr_x(4),  gpr_x(5),  gpr_x(6),  gpr_x(7),
+		gpr_x(8),  gpr_x(9),  gpr_x(10), gpr_x(11),
+		gpr_x(12), gpr_x(13), gpr_x(14), gpr_x(15),
+		gpr_x(16), gpr_x(17), gpr_x(18), gpr_x(19),
+		gpr_x(20), gpr_x(21), gpr_x(22), gpr_x(23),
+		gpr_x(24), gpr_x(25), gpr_x(26), gpr_x(27),
+		gpr_x(28), gpr_x(29), gpr_x(30), gpr_x(31)
+	};
+
+	return x[idx];
+}
+
+gpr& w(int idx) {
+	static gpr_w w[] = {
+		gpr_w(0),  gpr_w(1),  gpr_w(2),  gpr_w(3),
+		gpr_w(4),  gpr_w(5),  gpr_w(6),  gpr_w(7),
+		gpr_w(8),  gpr_w(9),  gpr_w(10), gpr_w(11),
+		gpr_w(12), gpr_w(13), gpr_w(14), gpr_w(15),
+		gpr_w(16), gpr_w(17), gpr_w(18), gpr_w(19),
+		gpr_w(20), gpr_w(21), gpr_w(22), gpr_w(23),
+		gpr_w(24), gpr_w(25), gpr_w(26), gpr_w(27),
+		gpr_w(28), gpr_w(29), gpr_w(30), gpr_w(31)
+	};
+
+	return w[idx];
+}
+
+}
+
+void isa::exec(instr isa_func) {
+	isa_func(this);
+}
 
 }
 }
-
-#endif

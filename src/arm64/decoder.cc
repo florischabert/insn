@@ -242,119 +242,122 @@ int val(uint32_t opcode, int index_end, int index_start) {
 
 #pragma mark decode - data processing (immediate)
 
-std::function<void(isa*)> decode_rel_addressing(uint32_t opcode) {
+isa::instr decode_rel_addressing(uint32_t opcode) {
 	int op = opcode::val(opcode, 31, 31);
-	int rd = opcode::val(opcode, 4, 0);
+	int d = opcode::val(opcode, 4, 0);
 	int immh = opcode::val(opcode, 23, 5);
 	int imml = opcode::val(opcode, 30, 29);
 	int imm = (immh << 2) | imml;
 
+	reg::gpr& rd = reg::x(d);
+
 	switch (op) {
-		case 0b0:
-			return std::bind(&isa::_adr, std::placeholders::_1, rd, imm);
-		case 0b1:
-			return std::bind(&isa::_adrp, std::placeholders::_1, rd, imm);
+		case 0b0: return isa_call(&isa::_adrp, rd, imm);
+		case 0b1: return isa_call(&isa::_adr, rd, imm);
 	}
 
 	throw invalid();
 }
 
-std::function<void(isa*)> decode_add_sub_imm(uint32_t opcode) {
+isa::instr decode_add_sub_imm(uint32_t opcode) {
 	bool is_64 = opcode::bit(opcode, 31);
-	int op = opcode::val(opcode, 30, 30);
-	bool set_flags = opcode::bit(opcode, 29);
-	int rd = opcode::val(opcode, 4, 0);
-	int rn = opcode::val(opcode, 9, 5);
+	int op = opcode::val(opcode, 30, 29);
+	int d = opcode::val(opcode, 4, 0);
+	int n = opcode::val(opcode, 9, 5);
 	int imm = opcode::val(opcode, 21, 10);
 	int shift = opcode::val(opcode, 23, 22);
 
+	reg::gpr& rd = is_64 ? reg::x(d) : reg::w(d);
+	reg::gpr& rn = is_64 ? reg::x(n) : reg::w(n);
+
 	switch (op) {
-		case 0b0:
-			return std::bind(&isa::_add, std::placeholders::_1, rd, rn, imm, shift, is_64, set_flags);
-		case 0b1:
-			return std::bind(&isa::_sub, std::placeholders::_1, rd, rn, imm, shift, is_64, set_flags);
+		case 0b00: return isa_call(&isa::_add, rd, rn, imm, shift);
+		case 0b01: return isa_call(&isa::_adds, rd, rn, imm, shift);
+		case 0b10: return isa_call(&isa::_sub, rd, rn, imm, shift);
+		case 0b11: return isa_call(&isa::_subs, rd, rn, imm, shift);
 	}
 
 	throw invalid();
 }
 
-std::function<void(isa*)> decode_logical_imm(uint32_t opcode) {
+isa::instr decode_logical_imm(uint32_t opcode) {
 	bool is_64 = opcode::bit(opcode, 31);
 	int op = opcode::val(opcode, 30, 29);
-	int rd = opcode::val(opcode, 4, 0);
-	int rn = opcode::val(opcode, 9, 5);
+	int d = opcode::val(opcode, 4, 0);
+	int n = opcode::val(opcode, 9, 5);
 	int imms = opcode::val(opcode, 15, 10);
 	int immr = opcode::val(opcode, 21, 16);
 
+	reg::gpr& rd = is_64 ? reg::x(d) : reg::w(d);
+	reg::gpr& rn = is_64 ? reg::x(n) : reg::w(n);
+
 	switch (op) {
-		case 0b00:
-			return std::bind(&isa::_and, std::placeholders::_1, rd, rn, imms, immr, is_64);
-		case 0b01:
-			return std::bind(&isa::_orr, std::placeholders::_1, rd, rn, imms, immr, is_64);
-		case 0b10:
-			return std::bind(&isa::_eor, std::placeholders::_1, rd, rn, imms, immr, is_64);
-		case 0b11:
-			return std::bind(&isa::_ands, std::placeholders::_1, rd, rn, imms, immr, is_64);
+		case 0b00: return isa_call(&isa::_and, rd, rn, imms, immr);
+		case 0b01: return isa_call(&isa::_orr, rd, rn, imms, immr);
+		case 0b10: return isa_call(&isa::_eor, rd, rn, imms, immr);
+		case 0b11: return isa_call(&isa::_ands, rd, rn, imms, immr);
 	}
 
 	throw invalid();
 }
 
-std::function<void(isa*)> decode_move_wide(uint32_t opcode) {
+isa::instr decode_move_wide(uint32_t opcode) {
 	bool is_64 = opcode::bit(opcode, 31);
 	int op = opcode::val(opcode, 30, 29);
-	int rd = opcode::val(opcode, 4, 0);
+	int d = opcode::val(opcode, 4, 0);
 	int imm = opcode::val(opcode, 21, 5);
 
+	reg::gpr& rd = is_64 ? reg::x(d) : reg::w(d);
+
 	switch (op) {
-		case 0b00:
-			return std::bind(&isa::_movn, std::placeholders::_1, rd, imm, is_64);
-		case 0b10:
-			return std::bind(&isa::_movz, std::placeholders::_1, rd, imm, is_64);
-		case 0b11:
-			return std::bind(&isa::_movk, std::placeholders::_1, rd, imm, is_64);
+		case 0b00: return isa_call(&isa::_movn, rd, imm);
+		case 0b10: return isa_call(&isa::_movz, rd, imm);
+		case 0b11: return isa_call(&isa::_movk, rd, imm);
 	}
 
 	throw invalid();
 }
 
-std::function<void(isa*)> decode_bitfield(uint32_t opcode) {
+isa::instr decode_bitfield(uint32_t opcode) {
 	bool is_64 = opcode::bit(opcode, 31);
 	int op = opcode::val(opcode, 30, 29);
-	int rd = opcode::val(opcode, 4, 0);
-	int rn = opcode::val(opcode, 9, 5);
+	int d = opcode::val(opcode, 4, 0);
+	int n = opcode::val(opcode, 9, 5);
 	int imms = opcode::val(opcode, 15, 10);
 	int immr = opcode::val(opcode, 21, 16);
 
+	reg::gpr& rd = is_64 ? reg::x(d) : reg::w(d);
+	reg::gpr& rn = is_64 ? reg::x(n) : reg::w(n);
+
 	switch (op) {
-		case 0b00:
-			return std::bind(&isa::_sbfm, std::placeholders::_1, rd, rn, imms, immr, is_64);
-		case 0b01:
-			return std::bind(&isa::_bfm, std::placeholders::_1, rd, rn, imms, immr, is_64);
-		case 0b10:
-			return std::bind(&isa::_ubfm, std::placeholders::_1, rd, rn, imms, immr, is_64);
+		case 0b00: return isa_call(&isa::_sbfm, rd, rn, imms, immr);
+		case 0b01: return isa_call(&isa::_bfm, rd, rn, imms, immr);
+		case 0b10: return isa_call(&isa::_ubfm, rd, rn, imms, immr);
 	}
 
 	throw invalid();
 }
 
-std::function<void(isa*)> decode_extract(uint32_t opcode) {
+isa::instr decode_extract(uint32_t opcode) {
 	bool is_64 = opcode::bit(opcode, 31);
 	int op = opcode::val(opcode, 30, 29);
-	int rd = opcode::val(opcode, 4, 0);
-	int rn = opcode::val(opcode, 9, 5);
+	int d = opcode::val(opcode, 4, 0);
+	int n = opcode::val(opcode, 9, 5);
 	int imms = opcode::val(opcode, 15, 10);
-	int rm = opcode::val(opcode, 20, 16);
+	int m = opcode::val(opcode, 20, 16);
+
+	reg::gpr& rd = is_64 ? reg::x(d) : reg::w(d);
+	reg::gpr& rn = is_64 ? reg::x(n) : reg::w(n);
+	reg::gpr& rm = is_64 ? reg::x(m) : reg::w(m);
 
 	switch (op) {
-		case 0b00:
-			return std::bind(&isa::_ext, std::placeholders::_1, rd, rn, rm, imms, is_64);
+		case 0b00: return isa_call(&isa::_ext, rd, rn, rm, imms);
 	}
 
 	throw invalid();
 }
 
-std::function<void(isa*)> decode_data_proc_imm(uint32_t opcode) {
+isa::instr decode_data_proc_imm(uint32_t opcode) {
 	if (opcode::is_rel_addressing(opcode)) {
 		return decode_rel_addressing(opcode);
 	}
@@ -379,29 +382,29 @@ std::function<void(isa*)> decode_data_proc_imm(uint32_t opcode) {
 
 #pragma mark decode - branch, system
 
-std::function<void(isa*)> decode_unconditional_branch_imm(uint32_t opcode) {
+isa::instr decode_unconditional_branch_imm(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_compare_and_branch(uint32_t opcode) {
+isa::instr decode_compare_and_branch(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_test_and_branch(uint32_t opcode) {
+isa::instr decode_test_and_branch(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_conditional_branch(uint32_t opcode) {
+isa::instr decode_conditional_branch(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_exception(uint32_t opcode) {
+isa::instr decode_exception(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_system(uint32_t opcode) {
+isa::instr decode_system(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_unconditional_branch_reg(uint32_t opcode) {
+isa::instr decode_unconditional_branch_reg(uint32_t opcode) {
 	throw unsupported();
 }
 
-std::function<void(isa*)> decode_branch_sys(uint32_t opcode) {
+isa::instr decode_branch_sys(uint32_t opcode) {
 	if (opcode::is_unconditional_branch_imm(opcode)) {
 		return decode_unconditional_branch_imm(opcode);
 	}
@@ -429,44 +432,44 @@ std::function<void(isa*)> decode_branch_sys(uint32_t opcode) {
 
 #pragma mark decode - load, store
 
-std::function<void(isa*)> decode_load_store(uint32_t opcode) {
+isa::instr decode_load_store(uint32_t opcode) {
 	throw unsupported();
 }
 
 #pragma mark decode - data processing (register)
 
-std::function<void(isa*)> decode_logical_shift(uint32_t opcode) {
+isa::instr decode_logical_shift(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_add_sub_shift(uint32_t opcode) {
+isa::instr decode_add_sub_shift(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_add_sub_ext(uint32_t opcode) {
+isa::instr decode_add_sub_ext(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_add_sub_carry(uint32_t opcode) {
+isa::instr decode_add_sub_carry(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_cond_comp_reg(uint32_t opcode) {
+isa::instr decode_cond_comp_reg(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_cond_comp_imm(uint32_t opcode) {
+isa::instr decode_cond_comp_imm(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_cond_sel(uint32_t opcode) {
+isa::instr decode_cond_sel(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_data_proc_3(uint32_t opcode) {
+isa::instr decode_data_proc_3(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_data_proc_2(uint32_t opcode) {
+isa::instr decode_data_proc_2(uint32_t opcode) {
 	throw unsupported();
 }
-std::function<void(isa*)> decode_data_proc_1(uint32_t opcode) {
+isa::instr decode_data_proc_1(uint32_t opcode) {
 	throw unsupported();
 }
 
-std::function<void(isa*)> decode_data_proc_reg(uint32_t opcode) {
+isa::instr decode_data_proc_reg(uint32_t opcode) {
 	if (opcode::is_logical_shift(opcode)) {
 		return decode_logical_shift(opcode);
 	}
@@ -503,7 +506,7 @@ std::function<void(isa*)> decode_data_proc_reg(uint32_t opcode) {
 
 #pragma mark decode - data processing (simd, vfp)
 
-std::function<void(isa*)> decode_data_proc_neon(uint32_t opcode) {
+isa::instr decode_data_proc_neon(uint32_t opcode) {
 	throw unsupported();
 }
 
@@ -518,7 +521,7 @@ uint32_t decoder::fetch() {
 	return opcode;
 }
 
-std::function<void(isa*)> decoder::decode(uint32_t opcode) {
+isa::instr decoder::decode(uint32_t opcode) {
 	if (opcode::is_data_proc_imm(opcode)) {
 		return decode_data_proc_imm(opcode);
 	}
@@ -540,8 +543,8 @@ std::function<void(isa*)> decoder::decode(uint32_t opcode) {
 
 void decoder::next() {
 	uint32_t opcode = fetch();
-	std::function<void(isa*)> exec = decode(opcode);
-	exec((isa *)&_printer);
+	isa::instr instr = decode(opcode);
+	_printer.exec(instr);
 }
 
 }

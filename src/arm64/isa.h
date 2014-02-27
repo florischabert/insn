@@ -23,25 +23,64 @@
 #ifndef ARM64_ISA_H__
 #define ARM64_ISA_H__
 
+#include <functional>
+
 namespace insn {
 namespace arm64 {
 
+#pragma mark registers
+
+namespace reg {
+
+struct gpr {
+	int idx;
+	bool is_64;
+};
+
+struct gpr_x : public gpr {
+	gpr_x(int idx_) { idx = idx_; is_64 = true; }
+};
+
+struct gpr_w : public gpr {
+	gpr_w(int idx_) { idx = idx_; is_64 = false; }
+};
+
+gpr& x(int idx);
+gpr& w(int idx);
+
+struct neon {
+	neon(int idx_) : idx(idx_) {}
+	int idx;
+};
+
+}
+
+#pragma mark instructions
+
+#define isa_call(instr, args...) \
+	std::bind(instr, std::placeholders::_1, args)
+
 struct isa {
-	virtual void _adr(int rd, int imm) = 0;
-	virtual void _adrp(int rd, int imm) = 0;
-	virtual void _add(int rd, int rn, int imm, int shift, bool is_64, bool set_flags) = 0;
-	virtual void _sub(int rd, int rn, int imm, int shift, bool is_64, bool set_flags) = 0;
-	virtual void _and(int rd, int rn, int imms, int immr, bool is_64) = 0;
-	virtual void _orr(int rd, int rn, int imms, int immr, bool is_64) = 0;
-	virtual void _eor(int rd, int rn, int imms, int immr, bool is_64) = 0;
-	virtual void _ands(int rd, int rn, int imms, int immr, bool is_64) = 0;
-	virtual void _movn(int rd, int imm, int is_64) = 0;
-	virtual void _movz(int rd, int imm, int is_64) = 0;
-	virtual void _movk(int rd, int imm, int is_64) = 0;
-	virtual void _sbfm(int rd, int rn, int imms, int immr, bool is_64) = 0;
-	virtual void _bfm(int rd, int rn, int imms, int immr, bool is_64) = 0;
-	virtual void _ubfm(int rd, int rn, int imms, int immr, bool is_64) = 0;
-	virtual void _ext(int rd, int rn, int rm, int immr, bool is_64) = 0;
+	typedef std::function<void(isa*)> instr;
+	void exec(instr isa_func);
+
+	virtual void _adr(reg::gpr rd, int imm) = 0;
+	virtual void _adrp(reg::gpr rd, int imm) = 0;
+	virtual void _add(reg::gpr rd, reg::gpr rn, int imm, int shift) = 0;
+	virtual void _adds(reg::gpr rd, reg::gpr rn, int imm, int shift) = 0;
+	virtual void _sub(reg::gpr rd, reg::gpr rn, int imm, int shift) = 0;
+	virtual void _subs(reg::gpr rd, reg::gpr rn, int imm, int shift) = 0;
+	virtual void _and(reg::gpr rd, reg::gpr rn, int imms, int immr) = 0;
+	virtual void _orr(reg::gpr rd, reg::gpr rn, int imms, int immr) = 0;
+	virtual void _eor(reg::gpr rd, reg::gpr rn, int imms, int immr) = 0;
+	virtual void _ands(reg::gpr rd, reg::gpr rn, int imms, int immr) = 0;
+	virtual void _movn(reg::gpr rd, int imm) = 0;
+	virtual void _movz(reg::gpr rd, int imm) = 0;
+	virtual void _movk(reg::gpr rd, int imm) = 0;
+	virtual void _sbfm(reg::gpr rd, reg::gpr rn, int imms, int immr) = 0;
+	virtual void _bfm(reg::gpr rd, reg::gpr rn, int imms, int immr) = 0;
+	virtual void _ubfm(reg::gpr rd, reg::gpr rn, int imms, int immr) = 0;
+	virtual void _ext(reg::gpr rd, reg::gpr rn, reg::gpr rm, int immr) = 0;
 };
 
 }
