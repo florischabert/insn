@@ -26,12 +26,12 @@
 
 namespace insn {
 
-decoder* decoder::for_arch(std::string arch) {
+std::unique_ptr<decoder> decoder::for_arch(std::string arch) {
 	if (arch == "arm64") {
-		return new arm64::decoder();
+		return std::unique_ptr<decoder>(new arm64::decoder());
 	}
 
-	throw std::runtime_error("Architecture not supported");
+	throw std::runtime_error("Architecture not supported.");
 }
 
 void decoder::reset() {

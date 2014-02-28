@@ -34,7 +34,7 @@ struct unsupported : public std::exception {};
 
 class decoder {
 public:
-	static decoder* for_arch(std::string arch);
+	static std::unique_ptr<decoder> for_arch(std::string arch);
 	void reset();
 	void reset(uintptr_t code);
 	virtual void next() = 0;

@@ -24,19 +24,17 @@
 
 #include <string>
 
-using namespace insn;
-
-run::run(std::string filename) :
-	_loader(loader::for_file(filename)),
-	_decoder(decoder::for_arch(_loader->arch)) {
+run::run(std::string filename) {
+	loader = insn::loader::for_file(filename);
+	decoder = insn::decoder::for_arch(loader->arch);
 }
 
 void run::go() {
-	_loader->load();
-	_decoder->reset(_loader->code);
+	loader->load();
+	decoder->reset(loader->code);
 
 	while (true) {
-		_decoder->next();
+		// decoder->next();
 	}
 }
 

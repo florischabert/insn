@@ -35,8 +35,8 @@ public:
 	void go();
 
 private:
-	std::unique_ptr<insn::loader> _loader;
-	std::unique_ptr<insn::decoder> _decoder;
+	std::unique_ptr<insn::loader> loader;
+	std::unique_ptr<insn::decoder> decoder;
 };
  
-#endif	
+#endif

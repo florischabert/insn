@@ -24,18 +24,23 @@
 #define LOADER_H__
 
 #include <string>
+#include <fstream>
 
 namespace insn {
 
 class loader {
 public:
-	static loader* for_file(std::string filename);
+	static std::unique_ptr<loader> for_file(std::string filename);
+	loader(std::string filename);
 	void load();
 
+	std::string filename;
 	std::string arch;
 	uintptr_t code;
 
-private:
+protected:
+	virtual void load_code() = 0;
+	std::ifstream file;
 };
 
 }
